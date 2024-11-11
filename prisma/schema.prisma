@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String
+  isProfileCompleted Boolean @default(false)
+  branch String?
+  sem String?
+  phone String?
+  books Book[]
+  transactionsAsBuyer Transaction[] @relation("buyer")
+  transactionsAsSeller Transaction[] @relation("seller")
+  donations         Donation[]
+}
+
+model Course {
+  id    Int     @id @default(autoincrement())
+  courseCode String @unique
+  sem String
+  courseName String
+  books Book[]
+}
+
+model Book {
+  id         Int     @id @default(autoincrement())
+  course     Course  @relation(fields: [courseCode], references: [courseCode])
+  courseCode String
+  amount     Int
+  user       User    @relation(fields: [userEmail], references: [email])
+  userEmail  String
+  author     String
+  name       String
+}
+
+model Transaction {
+  id         Int     @id @default(autoincrement())
+  buyer      User    @relation("buyer", fields: [buyerId], references: [id])
+  buyerId    Int
+  seller     User    @relation("seller", fields: [sellerId], references: [id])
+  sellerId   Int
+  send       Int
+  received   Int
+}
+
+model Donation {
+  id         Int     @id @default(autoincrement())
+  user       User    @relation(fields: [userId], references: [id])
+  userId     Int
+  amount     Int
+}
